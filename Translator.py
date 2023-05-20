@@ -5,10 +5,9 @@ class Translator:
         self.width
         self.height
         #self.dictionary use if not just 0's 1's and 2
-        self.translate()
         self.dimensions()
 
-    def translate(self, MazeFile="C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript1"):
+    def translate(self, MazeFile=r"C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript1"):
         while True:
             cut = []
             file = open(MazeFile)
