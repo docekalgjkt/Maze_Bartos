@@ -8,10 +8,10 @@ class Translator:
         self.translate()
         self.dimensions()
 
-    def translate(self):
+    def translate(self, MazeFile="C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript1"):
         while True:
             cut = []
-            file = open("C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript1")
+            file = open(MazeFile)
             script = file.readlines()
             for line in script:
                 if line != "":
@@ -25,3 +25,7 @@ class Translator:
         self.width = len(self.transcript[0])
         self.height = len(self.transcript)
         return self
+    
+if __name__ == "__main__":
+    translator = Translator()
+    print(translator.transcript)
