@@ -13,12 +13,12 @@ class MazeUI:
 
     def UI(self):
         window = tk.Tk()
-        window.geometry("1200x900")
+        window.geometry("800x600")
         window.configure(bg="lightgray")
         window.title("Maze")
 
-        canvas = tk.Canvas(window, height= 880, width= 880)
-        canvas.pack(side= "left")
+        canvas = tk.Canvas(window, height= 500, width= 500)
+        canvas.pack(padx=50, pady=50, side="left")
 
         window.mainloop()
 
