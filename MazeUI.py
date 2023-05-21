@@ -1,14 +1,15 @@
 from tkinter import *
 import tkinter as tk
 import tkinter.ttk as ttk
-import Translator as translator
+from Translator import *
 
 class MazeUI:
     def __init__(self):
         # Maze info from transcript 
-        self.maze_transcript = [[1,0,0,0,0,0,0,0,0,1],[0,1,1,0,0,1,0,1,1,0],[0,1,0,0,1,0,0,0,1,0],[0,0,0,1,1,0,1,0,0,0],[0,1,0,0,0,0,1,1,0,0],[0,0,1,1,0,0,0,0,1,0],[0,0,0,1,0,1,1,0,0,0],[0,1,0,0,0,1,0,0,1,0],[0,1,1,0,1,0,0,1,1,2],[1,0,0,0,0,0,0,0,0,1]] # translator.transcript
-        self.maze_width = 10 #translator.width
-        self.maze_height = 10 #translator.height
+        self.translator = Translator()
+        self.maze_transcript = None
+        self.maze_width = None
+        self.maze_height = None
         self.UI()
 
     def UI(self):
@@ -35,19 +36,16 @@ class MazeUI:
         window.rowconfigure(8, minsize=100)
 
         # UI widgets ----
-        self.draw_maze(window)
         self.draw_buttons(window)
         self.draw_menu(window)
 
         window.mainloop()
     
-
-
     def draw_maze(self, window):
         height = 500
         width = 500
         canvas = tk.Canvas(window, height= height, width= width)
-        block_height = height / self.maze_height
+        block_height = height / float(self.maze_height)
         block_width = width / self.maze_width
         for y in range(self.maze_height):
             for x in range(self.maze_width):
@@ -55,10 +53,7 @@ class MazeUI:
                     block = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="black")
                 elif self.maze_transcript[y][x] == 2:
                     socket_path = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="white")
-                    socket = canvas.create_oval(x*block_width+5, y*block_height+5, (x+1)*block_width-5,(y+1)*block_height-5, fill="limegreen", width=2)
-                    eye1 = canvas.create_rectangle(x*block_width+5+10, y*block_height+5+10, (x)*block_width+5+15,(y)*block_height+5+22, fill="black")
-                    eye1 = canvas.create_rectangle((x+1)*block_width-5-10, (y+1)*block_height-5-18, (x+1)*block_width-5-15,(y+1)*block_height-5-30, fill="black")
-                    mouth = canvas.create_arc((x)*block_width+5+17, (y+1)*block_height-5-10, (x+1)*block_width-5-17,(y+1)*block_height-5-10, fill="black", style=tk.CHORD)
+                    socket = canvas.create_oval(x*block_width+5, y*block_height+5, (x+1)*block_width-5,(y+1)*block_height-5, fill="yellow", width=2)
                 else:
                     path = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="white")
         canvas.grid( column=1, row=1, columnspan=5, rowspan=7, sticky="SNEW")
@@ -69,10 +64,22 @@ class MazeUI:
         select_maze = tk.Label(window, text="Select maze")
         select_maze.configure(bg="lightgray", font="Helvetica 14 bold")
         select_maze.grid(row=1, column=6, columnspan=4, sticky="SEW")
-
+        
+        def maze_Selcted(event):
+            if choose.get() != "Pick the Maze":
+                maze_selcted = choose.get()
+                self.translator.translate(maze_selcted)
+                self.maze_transcript = self.translator.transcript
+                self.maze_width = self.translator.width
+                self.maze_height = self.translator.height
+                self.draw_maze(window)
+        
         choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold")
         choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2"]
+        choose["state"] = "readonly"
+        choose.set("Pick the Maze")
         choose.grid(row=2, column=6, columnspan=4, sticky="SNEW", padx=5, pady=5)
+        choose.bind("<<ComboboxSelected>>", maze_Selcted)
 
         from_file = tk.Entry(window, justify="center", font="Helvetica 10 bold")
         from_file.insert(0, "Copy path to maze from PC")
@@ -146,7 +153,7 @@ class MazeUI:
         down_y.grid(row=6, column=9, sticky="SNEW")
 
         def go():
-            print("help")
+            print("help!!!")
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
 
