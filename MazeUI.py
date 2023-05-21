@@ -1,3 +1,4 @@
+from tkinter import *
 import tkinter as tk
 import tkinter.ttk as ttk
 import Translator as translator
@@ -36,6 +37,7 @@ class MazeUI:
         # UI widgets ----
         self.draw_maze(window)
         self.draw_buttons(window)
+        self.draw_menu(window)
 
         window.mainloop()
     
@@ -61,6 +63,8 @@ class MazeUI:
                     path = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="white")
         canvas.grid( column=1, row=1, columnspan=5, rowspan=7, sticky="SNEW")
 
+
+
     def draw_buttons(self, window):
         select_maze = tk.Label(window, text="Select maze")
         select_maze.configure(bg="lightgray", font="Helvetica 14 bold")
@@ -74,7 +78,7 @@ class MazeUI:
         from_file.insert(0, "Copy path to maze from PC")
         from_file.grid(row=3, column=6, columnspan=3, sticky="SNEW", padx=5, pady=5)
         def clear():
-            clear_window = 1
+            from_file.delete(0, END)
         clear_from_file = tk.Button(window, text="X", command=clear,bg="lightgray", font="Helvetica 10 bold")
         clear_from_file.grid(row=3, column=9, sticky="SNEW", pady=5)
 
@@ -82,32 +86,82 @@ class MazeUI:
         coords.configure(bg="lightgray", font="Helvetica 14 bold")
         coords.grid(row=4, column=6, columnspan=4, sticky="SEW", padx=5, pady=10)
 
-        def add():
-            n=n+1
+        def add_x():
+            if x_coord.get() == "X":
+                x_coord.delete(0, END)
+                x_coord.insert(0, "1")
+            else:
+                x_now = int(x_coord.get())
+                x_coord.delete(0, END)
+                x_now += 1
+                x_coord.insert(0, x_now)
+        
+        def add_y():
+            if y_coord.get() == "Y":
+                y_coord.delete(0, END)
+                y_coord.insert(0, "1")
+            else:
+                y_now = int(y_coord.get())
+                y_coord.delete(0, END)
+                y_now += 1
+                y_coord.insert(0, y_now)
+        
+        def subtract_x():
+            if x_coord.get() != "X":
+                if x_coord.get() == "1":
+                    x_coord.delete(0, END)
+                    x_coord.insert(0, "X")
+                else:
+                    x_now = int(x_coord.get())
+                    x_coord.delete(0, END)
+                    x_now -= 1
+                    x_coord.insert(0, x_now)
+        
+        def subtract_y():
+            if y_coord.get() != "Y":
+                if y_coord.get() == "1":
+                    y_coord.delete(0, END)
+                    y_coord.insert(0, "Y")
+                else:
+                    y_now = int(y_coord.get())
+                    y_coord.delete(0, END)
+                    y_now -= 1
+                    y_coord.insert(0, y_now)
 
-        def subtract():
-            n=n-1
 
         x_coord = tk.Entry(window, width=3, justify="center", font="Helvetica 25 bold")
         x_coord.insert(0, "X")
         x_coord.grid(row=5, column=6, rowspan=2, sticky="SNEW", padx=5)
-        up_x = tk.Button(window, text="▲", command=add, bg="lightgray", font="Helvetica 10 bold")
+        up_x = tk.Button(window, text="▲", command=add_x, bg="lightgray", font="Helvetica 10 bold")
         up_x.grid(row=5, column=7, sticky="SNEW")
-        down_x = tk.Button(window, text="▼", command=subtract, bg="lightgray", font="Helvetica 10 bold")
+        down_x = tk.Button(window, text="▼", command=subtract_x, bg="lightgray", font="Helvetica 10 bold")
         down_x.grid(row=6, column=7, sticky="SNEW")
 
         y_coord = tk.Entry(window, width=3, justify="center", font="Helvetica 25 bold")
         y_coord.insert(0, "Y")
         y_coord.grid(row=5, column=8, rowspan=2, sticky="SNEW", padx=5)
-        up_y = tk.Button(window, text="▲", command=add, bg="lightgray", font="Helvetica 10 bold")
+        up_y = tk.Button(window, text="▲", command=add_y, bg="lightgray", font="Helvetica 10 bold")
         up_y.grid(row=5, column=9, sticky="SNEW")
-        down_y = tk.Button(window, text="▼", command=subtract, bg="lightgray", font="Helvetica 10 bold")
+        down_y = tk.Button(window, text="▼", command=subtract_y, bg="lightgray", font="Helvetica 10 bold")
         down_y.grid(row=6, column=9, sticky="SNEW")
 
         def go():
             print("help")
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
+
+    def draw_menu(self, window):
+        def instructions():
+            pass
+        def settings():
+            pass
+
+        menu = Menu(window)
+        menu.add_command(label= "Instructions", command= instructions)
+        menu.add_checkbutton(label="Use path as input", command= settings)
+        #menu.pack()
+        
+
 
 '''
 int_variable.type() - returns type of variable as <class 'int'>
