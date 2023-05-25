@@ -1,49 +1,32 @@
 from Translator import *
+from Memory import *
 
 class Robot:
-    def __init__(self):
-        self.translator = Translator()
-        translator.translate(r"C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript2")
-        self.transcript = self.translator.transcript
-        self.xy = [0,0]
-        self.check_surroundings()
+    def __init__(self, y_coord, x_coord):
+
+        self.yx = [y_coord, x_coord]   # [y,x]
         
-    def check_surroundings(self):
-        x = self.xy[0]
-        y = self.xy[1]
+    def check_surroundings(self, place):
+        dir = place[0]
+        x = place[2]
+        y = place[1]
 
         possible_routs = []
-        # S
-        try:
-            if self.transcript[y+1][x] != "1":
-                possible_routs.append(self.transcript[y+1][x])
-        except IndexError:
-            pass
-        # N
-        try:
-            if self.transcript[y-1][x] != "1":
-                possible_routs.append(self.transcript[y-1][x])
-        except IndexError:
-            pass
         
-        # E
-        try:
-            if self.transcript[y][x-1] != "1":
-                possible_routs.append(self.transcript[y][x-1])
-        except IndexError:
-            pass
-        
-        # W
-        try:
-            if self.transcript[y][x+1] != "1":
-                possible_routs.append(self.transcript[y][x+1])
-        except IndexError:
-            pass
-        
-        print(possible_routs)
-    
     def navigation(self):
+        # possible_routs = self.check_surroundings(possible_route) possible_rout from last iteration
+        # for route in possible_routs
+            # check_surroundings(route) --> change 
+                # if transcript[y][x] == 2:
+                    # return final route
+            # navigation()
         pass
+
+    def memory(self):
+        memory = Memory()
 
     def sprite(self):
         pass
+
+if __name__ == "__main__":
+    robot = Robot(0, 0)

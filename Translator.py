@@ -1,13 +1,14 @@
 class Translator:
     def __init__(self):
-
+        self.MazeFile = None
         self.transcript = []
         self.width = None
         self.height = None
         #self.dictionary use if not just 0's 1's and 2
 
     def translate(self, MazeFile):
-        file = open(MazeFile)
+        self.MazeFile = MazeFile
+        file = open(self.MazeFile)
         script = file.readlines()
         for line in script:
             cut = []
@@ -22,4 +23,5 @@ class Translator:
     
 if __name__ == "__main__":
     translator = Translator()
+    translator.translate(r"C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript2")
     print(translator.transcript)
