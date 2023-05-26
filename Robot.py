@@ -2,23 +2,13 @@ from Translator import *
 from Memory import *
 
 class Robot:
-    def __init__(self, y_coord, x_coord):
-        self.memory = Memory()
-        self.yx = [y_coord, x_coord]   # [y,x]
+    def __init__(self, coordinates, transcript):
+        self.memory = Memory(coordinates, transcript)
+        self.path = Memory.find_socket()
         self.step = None
-        
-    def check_surroundings(self, place):
-        dir = place[0]
-        x = place[2]
-        y = place[1]
 
-        possible_routs = []
-        
-    def navigation(self):
-        navigation = self.memory.find_socket()
-            
-    def sprite(self):
-        pass
+    def next_step(self):
+        self.step = self.path.pop()
 
 if __name__ == "__main__":
-    robot = Robot(0, 0)
+    robot = Robot([0, 0], [[0, 0, 0, 0, 0], [0, 0, 1, 1, 0], [0, 1, 2, 1, 0], [0, 1, 0, 0, 0], [1, 0, 1, 1, 0]])

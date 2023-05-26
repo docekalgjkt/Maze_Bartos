@@ -2,6 +2,8 @@ from tkinter import *
 import tkinter as tk
 import tkinter.ttk as ttk
 from Translator import *
+from Memory import *
+import time
 
 class MazeUI:
     def __init__(self):
@@ -10,6 +12,11 @@ class MazeUI:
         self.maze_transcript = None
         self.maze_width = None
         self.maze_height = None
+        self.canvas = None
+        self.block_height = None
+        self.block_width = None
+        self.robot = None
+        self.memory = None
         self.UI()
 
     def UI(self):
@@ -44,19 +51,19 @@ class MazeUI:
     def draw_maze(self, window):
         height = 500
         width = 500
-        canvas = tk.Canvas(window, height= height, width= width)
-        block_height = height / float(self.maze_height)
-        block_width = width / self.maze_width
+        self.canvas = tk.Canvas(window, height= height, width= width)
+        self.block_height = height / float(self.maze_height)
+        self.block_width = width / self.maze_width
         for y in range(self.maze_height):
             for x in range(self.maze_width):
                 if self.maze_transcript[y][x] == 1:
-                    block = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="black")
+                    block = self.canvas.create_rectangle(x*self.block_width, y*self.block_height, (x+1)*self.block_width,(y+1)*self.block_height, fill="black")
                 elif self.maze_transcript[y][x] == 2:
-                    socket_path = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="white")
-                    socket = canvas.create_oval(x*block_width+5, y*block_height+5, (x+1)*block_width-5,(y+1)*block_height-5, fill="yellow", width=2)
+                    socket_path = self.canvas.create_rectangle(x*self.block_width, y*self.block_height, (x+1)*self.block_width,(y+1)*self.block_height, fill="white")
+                    socket = self.canvas.create_oval(x*self.block_width+5, y*self.block_height+5, (x+1)*self.block_width-5,(y+1)*self.block_height-5,fill="yellow", width=2)
                 else:
-                    path = canvas.create_rectangle(x*block_width, y*block_height, (x+1)*block_width,(y+1)*block_height, fill="white")
-        canvas.grid( column=1, row=1, columnspan=5, rowspan=7, sticky="SNEW")
+                    path = self.canvas.create_rectangle(x*self.block_width, y*self.block_height, (x+1)*self.block_width,(y+1)*self.block_height, fill="white")
+        self.canvas.grid( column=1, row=1, columnspan=5, rowspan=7, sticky="SNEW")
 
 
 
@@ -73,6 +80,8 @@ class MazeUI:
                 self.maze_width = self.translator.width
                 self.maze_height = self.translator.height
                 self.draw_maze(window)
+                if x_coord.get() != "X" and y_coord.get() != "Y":
+                    draw_sprite(self.canvas, [int(y_coord.get()), int(x_coord.get())]) 
         
         choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold")
         choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2"]
@@ -94,28 +103,39 @@ class MazeUI:
         coords.grid(row=4, column=6, columnspan=4, sticky="SEW", padx=5, pady=10)
 
         def add_x():
+            self.robot
             if x_coord.get() == "X":
                 x_coord.delete(0, END)
-                x_coord.insert(0, "1")
+                x_coord.insert(0, "0")
+                if x_coord.get() != "X" and y_coord.get() != "Y":
+                    move_sprite(self.block_width, 0)
             else:
                 x_now = int(x_coord.get())
                 x_coord.delete(0, END)
                 x_now += 1
                 x_coord.insert(0, x_now)
+                if x_coord.get() != "X" and y_coord.get() != "Y":
+                    move_sprite(self.block_width, 0)
+
         
         def add_y():
             if y_coord.get() == "Y":
                 y_coord.delete(0, END)
-                y_coord.insert(0, "1")
+                y_coord.insert(0, "0")
+                if x_coord.get() != "X" and y_coord.get() != "Y":
+                    move_sprite(0, self.block_height)
+
             else:
                 y_now = int(y_coord.get())
                 y_coord.delete(0, END)
                 y_now += 1
                 y_coord.insert(0, y_now)
+                if x_coord.get() != "X" and y_coord.get() != "Y":
+                    move_sprite(0, self.block_height)
         
         def subtract_x():
             if x_coord.get() != "X":
-                if x_coord.get() == "1":
+                if x_coord.get() == "0":
                     x_coord.delete(0, END)
                     x_coord.insert(0, "X")
                 else:
@@ -123,10 +143,11 @@ class MazeUI:
                     x_coord.delete(0, END)
                     x_now -= 1
                     x_coord.insert(0, x_now)
+            move_sprite(-self.block_width, 0)
         
         def subtract_y():
             if y_coord.get() != "Y":
-                if y_coord.get() == "1":
+                if y_coord.get() == "0":
                     y_coord.delete(0, END)
                     y_coord.insert(0, "Y")
                 else:
@@ -134,6 +155,7 @@ class MazeUI:
                     y_coord.delete(0, END)
                     y_now -= 1
                     y_coord.insert(0, y_now)
+            move_sprite(0, -self.block_height)
 
 
         x_coord = tk.Entry(window, width=3, justify="center", font="Helvetica 25 bold")
@@ -153,15 +175,34 @@ class MazeUI:
         down_y.grid(row=6, column=9, sticky="SNEW")
 
         def go():
-            pass
-            # robot sprite on x & y position
-            # for node in path
-                # destroy last robot
-                # print new robot
-                # wait few secs 
+            self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
+            path = self.memory.find_socket()
+            previous = path.pop()
+            while path != []:
+                node = path.pop()
+                # move diference between x's
+                move_x = (int(node.position[1]) - int(previous.position[1]))*self.block_width
+                # move diference between y's
+                move_y = (int(node.position[0]) - int(previous.position[0]))*self.block_height 
+                move_sprite(move_x, move_y)
+                previous = node
+                print(node.position, end=",")
+                time.sleep(1)
 
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
+
+        def move_sprite(x, y):
+            if self.robot == None:
+                draw_sprite(self.canvas, [int(x_coord.get()), int(y_coord.get())]) 
+            else:
+                self.canvas.move(self.robot, x, y)
+
+
+        def draw_sprite(canvas, coords):
+            x = coords[1]
+            y = coords[0]
+            self.robot = self.canvas.create_oval(x*self.block_width+5, y*self.block_height+5, (x+1)*self.block_width-5,(y+1)*self.block_height-5, fill="steelblue", width=2)
 
     def draw_menu(self, window):
         def instructions():
@@ -173,9 +214,16 @@ class MazeUI:
         menu.add_command(label= "Instructions", command= instructions)
         menu.add_checkbutton(label="Use path as input", command= settings)
         #menu.pack()
-        
+    
 
-
+        '''
+        R = (5/14)*self.block_width
+        r = (3/14)*self.block_width
+        left= canvas.create_oval(x*(2*R-r),x*self.block_width,y*(2*R+r),y*(2*r), fill= "dimgray")
+        right= canvas.create_oval(x*(2*R-r),x*(self.block_height-2*r),y*(2*R+r),y*(self.block_height), fill="dimgray") 
+        body= canvas.create_oval(x*self.block_width,x*((self.block_height/2)-R),y*(2*R),y*((self.block_height/2)+R), fill="darkgray")
+        glasses= canvas.create_oval(x*(self.block_width*5/14),x*r,y*2*R,y*(self.block_height-r), fill="steelblue")
+        '''
 '''
 int_variable.type() - returns type of variable as <class 'int'>
 '''
