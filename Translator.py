@@ -7,6 +7,7 @@ class Translator:
         #self.dictionary use if not just 0's 1's and 2
 
     def translate(self, MazeFile):
+        self.transcript = []
         self.MazeFile = MazeFile
         file = open(self.MazeFile)
         script = file.readlines()

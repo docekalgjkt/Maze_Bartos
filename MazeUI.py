@@ -153,7 +153,13 @@ class MazeUI:
         down_y.grid(row=6, column=9, sticky="SNEW")
 
         def go():
-            print("help!!!")
+            pass
+            # robot sprite on x & y position
+            # for node in path
+                # destroy last robot
+                # print new robot
+                # wait few secs 
+
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
 

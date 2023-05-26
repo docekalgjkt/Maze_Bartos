@@ -20,16 +20,14 @@ class Node:
         self.children = [] # S N W E
 
 class Memory:
-    def __init__(self, origin): 
+    def __init__(self, origin, transcript): 
         self.discovered = []
         self.path = []
         self.root = Node(origin) # starting position of robot
         self.discovered.append(self.root.position)
-        self.translator = Translator()
-        self.translator.translate(r"C:\Users\42077\OneDrive\GitHub.me\Maze_\MazeScript2")
+        self.transcript = transcript
         self.queue = Queue()
         self.queue.add(self.root)
-        self.find_socket()
 
     def check_surroundings(self, node): # enter node of which children we are looking for
         for i in [1, -1]:
@@ -37,7 +35,7 @@ class Memory:
                 if node.position[0] == 0 and i == -1:
                     continue
                 else:
-                    if self.translator.transcript[node.position[0]+i][node.position[1]] != 1:
+                    if self.transcript[node.position[0]+i][node.position[1]] != 1:
                         child = Node([node.position[0]+i,node.position[1]])
                         child.parent = node
                         if child.position not in self.discovered:
@@ -54,7 +52,7 @@ class Memory:
                 if node.position[1] == 0 and j == -1:
                     continue
                 else:
-                    if self.translator.transcript[node.position[0]][node.position[1]+j] != 1:
+                    if self.transcript[node.position[0]][node.position[1]+j] != 1:
                         child = Node([node.position[0],node.position[1]+j])
                         child.parent = node
                         if child.position not in self.discovered:
@@ -66,7 +64,7 @@ class Memory:
             except IndexError:
                 node.children.append(None)
         
-        if self.translator.transcript[node.position[0]][node.position[1]] == 2:
+        if self.transcript[node.position[0]][node.position[1]] == 2:
             knot = node
             self.path.append(knot)
             while knot.parent != None:
@@ -77,14 +75,11 @@ class Memory:
     def find_socket(self):
         while self.path == []:
             self.check_surroundings(self.queue.use())
-            for q in self.queue.queue:
-                print(q.position, end=",")
-            print(" \n")
         return self.path
 
 
 
 if __name__ == "__main__":
-    memory = Memory([0, 0])
+    memory = Memory([0, 0], [[0, 0, 0, 0, 0], [0, 0, 1, 1, 0], [0, 1, 2, 1, 0], [0, 1, 0, 0, 0], [1, 0, 1, 1, 0]])
     for q in memory.find_socket():
-        print(q.position)
+        print(q.position, end=",")
