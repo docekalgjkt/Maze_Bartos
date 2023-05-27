@@ -17,6 +17,7 @@ class MazeUI:
         self.block_width = None
         self.robot = None
         self.memory = None
+        self.previous = None
         self.UI()
 
     def UI(self):
@@ -174,20 +175,29 @@ class MazeUI:
         down_y = tk.Button(window, text="▼", command=subtract_y, bg="lightgray", font="Helvetica 10 bold")
         down_y.grid(row=6, column=9, sticky="SNEW")
 
+        def walk(path):
+            node = path.pop()
+            # move diference between x's
+            move_x = (int(node.position[1]) - int(self.previous.position[1]))*self.block_width
+            # move diference between y's
+            move_y = (int(node.position[0]) - int(self.previous.position[0]))*self.block_height 
+            move_sprite(move_x, move_y)
+            move_x = None
+            move_y = None
+            self.previous = node
+            print(node.position, end=",")
+
         def go():
             self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
             path = self.memory.find_socket()
-            previous = path.pop()
+            self.previous = path.pop()
+            #for _ in self.batery:
             while path != []:
-                node = path.pop()
-                # move diference between x's
-                move_x = (int(node.position[1]) - int(previous.position[1]))*self.block_width
-                # move diference between y's
-                move_y = (int(node.position[0]) - int(previous.position[0]))*self.block_height 
-                move_sprite(move_x, move_y)
-                previous = node
-                print(node.position, end=",")
-                time.sleep(1)
+                window.after(1000, walk(path))
+            # if path == []
+            #   draw_congrats
+            # else:
+            #   draw_gameOver
 
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
@@ -197,7 +207,7 @@ class MazeUI:
                 draw_sprite(self.canvas, [int(x_coord.get()), int(y_coord.get())]) 
             else:
                 self.canvas.move(self.robot, x, y)
-
+                window.update()
 
         def draw_sprite(canvas, coords):
             x = coords[1]
