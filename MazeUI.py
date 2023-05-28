@@ -17,14 +17,18 @@ class MazeUI:
         self.robot = None
         self.memory = None
         self.previous = None
-        self.batery = range(20)
+        self.batery = range(15)
         self.bcanvas = None
         self.piece_height= None
+        self.exit_button = None
+        self.again = None
+        self.game_over = None
+        self.congrats = None
         self.UI()
 
     def UI(self):
         window = tk.Tk()
-        window.geometry("900x700")
+        window.geometry("900x600")
         window.configure(bg="lightgray")
         window.title("Maze")
         # Grid -----------
@@ -35,7 +39,7 @@ class MazeUI:
         window.columnconfigure(8, minsize=80)
         window.columnconfigure(9, minsize=20)
         
-        window.rowconfigure(0, minsize=100)
+        window.rowconfigure(0, minsize=50)
         window.rowconfigure(1, minsize=100)
         window.rowconfigure(2, minsize=50)
         window.rowconfigure(3, minsize=50)
@@ -43,12 +47,11 @@ class MazeUI:
         window.rowconfigure(5, minsize=50)
         window.rowconfigure(6, minsize=50)
         window.rowconfigure(7, minsize=100)
-        window.rowconfigure(8, minsize=100)
+        window.rowconfigure(8, minsize=50)
 
         # UI widgets ----
         self.draw_buttons(window)
         self.draw_batery(window)
-        self.draw_menu(window)
 
         window.mainloop()
     
@@ -78,13 +81,10 @@ class MazeUI:
         for n in self.batery:
             if n < len(self.batery)*0.2:
                 colors.append("red")
-                print("red", end=",")
             elif len(self.batery)*0.2 <= n <= len(self.batery)*0.5:
                 colors.append("yellow")
-                print("yellow", end=",")
             else:
                 colors.append("limegreen")
-                print("limegreen", end=",")
 
         for i in self.batery:
             piece = self.bcanvas.create_rectangle(2,i*self.piece_height+2,width, (i*self.piece_height)+self.piece_height, fill=colors[-i-1])
@@ -92,6 +92,16 @@ class MazeUI:
         self.bcanvas.grid(column=0, row=1, rowspan=7, sticky="SNEW", padx=5)
 
     def draw_buttons(self, window):
+        '''
+        menubar = tk.Menu(window)
+        instructions = tk.Menu(menubar, tearoff=0)
+        instructions.add_cascade(label="Instructions", menu=instructions)
+        instructions.add_command(label="How to play")
+        instructions.add_command(label="Coordinates")
+        instructions.add_command(label="Path to file")
+        window.config(menu= menubar)
+        '''
+        
         select_maze = tk.Label(window, text="Select maze")
         select_maze.configure(bg="lightgray", font="Helvetica 14 bold")
         select_maze.grid(row=1, column=6, columnspan=4, sticky="SEW")
@@ -209,11 +219,21 @@ class MazeUI:
                 move_x = None
                 move_y = None
                 self.previous = node
-                print(node.position, end=",")
             except:
                 pass
 
         def go():
+            # diable buttons
+            up_x["state"] = DISABLED
+            up_y["state"] = DISABLED
+            down_x["state"] = DISABLED
+            down_y["state"] = DISABLED
+            x_coord["state"] = DISABLED
+            y_coord["state"] = DISABLED
+            choose["state"] = DISABLED
+            play["state"] = DISABLED
+            clear_from_file["state"] = DISABLED
+            from_file["state"] = DISABLED
             self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
             path = self.memory.find_socket()
             copy = path.copy()
@@ -221,11 +241,11 @@ class MazeUI:
             for i in self.batery:
                 if i < len(copy)-1:
                     empty = self.bcanvas.create_rectangle(0+2,i*self.piece_height+2,100, (i*self.piece_height)+self.piece_height, fill="lightgray")
-                    window.after(1000, walk(path))
+                    window.after(750, walk(path))
             if len(copy)-1 <= len(self.batery):
-                self.draw_congrats(window)
+                draw_congrats()
             elif len(copy) > len(self.batery):
-                self.draw_gameOver(window)
+                draw_gameOver()
                 
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
@@ -242,41 +262,52 @@ class MazeUI:
             x = coords[1]
             y = coords[0]
             self.robot = self.canvas.create_oval(x*self.block_width+5, y*self.block_height+5, (x+1)*self.block_width-5,(y+1)*self.block_height-5, fill="steelblue", width=2)
+        
+        def exit_game():
+            def close():
+                window.destroy()
+            self.exit_button = tk.Button(text="Exit", command=close, bg="lightgray", font="Helvetica 10 bold")
+            self.exit_button.grid(row=4, column=1, rowspan=2, columnspan=5, sticky="N")
 
-    def draw_menu(self, window):
-        def instructions():
-            pass
-        def settings():
-            pass
+        def draw_congrats():
+            self.congrats = tk.Label(window,text="Congratulations", font= "Helvetica 25 bold", fg= "green")
+            self.congrats.grid(row= 2, column= 1, columnspan=5, sticky="SNEW")
+            play_again()
+            exit_game()
+        
+        def play_again():
+            def playagain():
+                up_x["state"] = NORMAL
+                up_y["state"] = NORMAL
+                down_x["state"] = NORMAL
+                down_y["state"] = NORMAL
+                x_coord["state"] = NORMAL
+                y_coord["state"] = NORMAL
+                choose["state"] = NORMAL
+                play["state"] = NORMAL
+                clear_from_file["state"] = NORMAL
+                from_file["state"] = NORMAL
+                self.exit_button.destroy()
+                self.again.destroy()
+                maze_Selcted("<<ComboboxSelected>>")
+                self.draw_batery(window)
+                if self.congrats != None:
+                    self.congrats.destroy()
+                    self.congrats = None
+                elif self.game_over != None:
+                    self.game_over.destroy()
+                    self.game_over = None
 
-        menu = Menu(window)
-        menu.add_command(label= "Instructions", command= instructions)
-        menu.add_checkbutton(label="Use path as input", command= settings)
-        #menu.pack()
-    
-    def play_again(self, window):
-        def playagain():
-            pass
-        again = tk.Button(text="Play Again!", command=playagain, bg="lightgray", font="Helvetica 10 bold") 
-        again.grid(row=3, column=1, columnspan=5)
+            self.again = tk.Button(text="Play Again!", command=playagain, bg="lightgray", font="Helvetica 10 bold") 
+            self.again.grid(row=3, column=1, columnspan=5)
 
-    def exit_game(self, window):
-        def close():
-            window.destroy()
-        exit = tk.Button(text="Exit", command=close, bg="lightgray", font="Helvetica 10 bold")
-        exit.grid(row=4, column=1, rowspan=2, columnspan=5, sticky="N")
+        def draw_gameOver():
+            self.game_over = tk.Label(window,text="Game Over", font= "Helvetica 25 bold", fg= "red")
+            self.game_over.grid(row= 2, column= 1, columnspan=5, sticky="SNEW")
+            play_again()
+            exit_game()
 
-    def draw_congrats(self, window):
-        congrats = tk.Label(window,text="Congratulations", font= "Helvetica 25 bold", fg= "green")
-        congrats.grid(row= 2, column= 1, columnspan=5, sticky="SNEW")
-        self.play_again(window)
-        self.exit_game(window)
-    
-    def draw_gameOver(self, window):
-        congrats = tk.Label(window,text="Game Over", font= "Helvetica 25 bold", fg= "red")
-        congrats.grid(row= 2, column= 1, columnspan=5, sticky="SNEW")
-        self.play_again(window)
-        self.exit_game(window)
+
 
         '''
         R = (5/14)*self.block_width
