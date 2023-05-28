@@ -17,13 +17,18 @@ class MazeUI:
         self.robot = None
         self.memory = None
         self.previous = None
-        self.batery = range(15)
+        self.batery = []
+        for i in range(11):
+            self.batery.append(i)
         self.bcanvas = None
         self.piece_height= None
         self.exit_button = None
         self.again = None
         self.game_over = None
         self.congrats = None
+        self.batery_up = None
+        self.batery_down = None
+        self.error = None
         self.UI()
 
     def UI(self):
@@ -90,6 +95,18 @@ class MazeUI:
             piece = self.bcanvas.create_rectangle(2,i*self.piece_height+2,width, (i*self.piece_height)+self.piece_height, fill=colors[-i-1])
         tip = self.bcanvas.create_rectangle(width-(0.2*width), 0.95*height+2, 0.2*width, height, fill="gray13")
         self.bcanvas.grid(column=0, row=1, rowspan=7, sticky="SNEW", padx=5)
+        def batery_add():
+            self.batery.append(self.batery[-1]+1)
+            self.draw_batery(window)
+        def batery_subtract():
+            if len(self.batery) > 1:
+                self.batery.pop()
+                self.draw_batery(window)
+
+        self.batery_up = tk.Button(text="+", font="Helvetica 14 bold", command=batery_add)
+        self.batery_up.grid(row=0, column=0, sticky="SEW", padx=5, pady=5)
+        self.batery_down = tk.Button(text="-", font="Helvetica 14 bold", command=batery_subtract)
+        self.batery_down.grid(row=8, column=0, sticky="NEW", padx=5, pady=5)
 
     def draw_buttons(self, window):
         '''
@@ -117,9 +134,8 @@ class MazeUI:
                 if x_coord.get() != "X" and y_coord.get() != "Y":
                     draw_sprite(self.canvas, [int(y_coord.get()), int(x_coord.get())]) 
         
-        choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold")
-        choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2"]
-        choose["state"] = "readonly"
+        choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold", state="readonly")
+        choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2", "MazeScript3", "MazeScript4"]
         choose.set("Pick the Maze")
         choose.grid(row=2, column=6, columnspan=4, sticky="SNEW", padx=5, pady=5)
         choose.bind("<<ComboboxSelected>>", maze_Selcted)
@@ -143,7 +159,7 @@ class MazeUI:
                 x_coord.insert(0, "0")
                 if x_coord.get() != "X" and y_coord.get() != "Y":
                     move_sprite(self.block_width, 0)
-            else:
+            elif int(x_coord.get()) < self.maze_width-1:
                 x_now = int(x_coord.get())
                 x_coord.delete(0, END)
                 x_now += 1
@@ -159,7 +175,7 @@ class MazeUI:
                 if x_coord.get() != "X" and y_coord.get() != "Y":
                     move_sprite(0, self.block_height)
 
-            else:
+            elif int(y_coord.get()) < self.maze_height-1:
                 y_now = int(y_coord.get())
                 y_coord.delete(0, END)
                 y_now += 1
@@ -224,6 +240,9 @@ class MazeUI:
 
         def go():
             # diable buttons
+            if self.error != None:
+                self.error.destroy()
+                self.error = None
             up_x["state"] = DISABLED
             up_y["state"] = DISABLED
             down_x["state"] = DISABLED
@@ -234,19 +253,31 @@ class MazeUI:
             play["state"] = DISABLED
             clear_from_file["state"] = DISABLED
             from_file["state"] = DISABLED
-            self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
-            path = self.memory.find_socket()
-            copy = path.copy()
-            self.previous = path.pop()
-            for i in self.batery:
-                if i < len(copy)-1:
-                    empty = self.bcanvas.create_rectangle(0+2,i*self.piece_height+2,100, (i*self.piece_height)+self.piece_height, fill="lightgray")
-                    window.after(750, walk(path))
-            if len(copy)-1 <= len(self.batery):
-                draw_congrats()
-            elif len(copy) > len(self.batery):
-                draw_gameOver()
-                
+            self.batery_up["state"] = DISABLED
+            self.batery_down["state"] = DISABLED
+            if x_coord.get() != "X" and y_coord.get() != "Y":
+                if self.maze_transcript[int(y_coord.get())][int(x_coord.get())] != 1:
+                    try:
+                        self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
+                        path = self.memory.find_socket()
+                        copy = path.copy()
+                        self.previous = path.pop()
+                        for i in self.batery:
+                            if i < len(copy)-1:
+                                empty = self.bcanvas.create_rectangle(0+2,i*self.piece_height+2,100, (i*self.piece_height)+self.piece_height, fill="lightgray")
+                                window.after(750, walk(path))
+                        if len(copy)-1 <= len(self.batery):
+                            draw_congrats()
+                        elif len(copy) > len(self.batery):
+                            draw_gameOver()
+                    except IndexError:
+                        error("Robot can't reach socket. Please place him better! <3")
+                        
+                else:
+                    error("Please do not place Robot on walls. Thank you! <3")
+            else:
+                error("Please set both coordinate walues. Thank you! <3")
+                    
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
 
@@ -287,6 +318,8 @@ class MazeUI:
                 play["state"] = NORMAL
                 clear_from_file["state"] = NORMAL
                 from_file["state"] = NORMAL
+                self.batery_up["state"] = NORMAL
+                self.batery_down["state"] = NORMAL
                 self.exit_button.destroy()
                 self.again.destroy()
                 maze_Selcted("<<ComboboxSelected>>")
@@ -306,6 +339,22 @@ class MazeUI:
             self.game_over.grid(row= 2, column= 1, columnspan=5, sticky="SNEW")
             play_again()
             exit_game()
+
+        def error(error_line):
+            self.error = tk.Label(text=error_line, font="Helvetica 14 bold", fg="red", bg="lightgray")
+            self.error.grid(row=8, column=1, columnspan=8)
+            up_x["state"] = NORMAL
+            up_y["state"] = NORMAL
+            down_x["state"] = NORMAL
+            down_y["state"] = NORMAL
+            x_coord["state"] = NORMAL
+            y_coord["state"] = NORMAL
+            choose["state"] = NORMAL
+            play["state"] = NORMAL
+            clear_from_file["state"] = NORMAL
+            from_file["state"] = NORMAL
+            self.batery_up["state"] = NORMAL
+            self.batery_down["state"] = NORMAL
 
 
 

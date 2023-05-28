@@ -19,6 +19,21 @@ class Translator:
                 self.transcript.append(cut)
         self.width = len(self.transcript[0])
         self.height = len(self.transcript)
+        
+        if self.width > self.height:
+            for i in range(self.width-self.height):
+                fill_line = []
+                for _ in range(self.width):
+                    fill_line.append(1)
+                self.transcript.append(fill_line)
+            self.height = self.width
+
+        elif self.width < self.height:
+            for line in self.transcript:
+                for _ in range(self.height-self.width):
+                    line.append(1)
+            self.width = self.height
+        
         return self
 
     
