@@ -1,3 +1,10 @@
+# To-Do
+# - create from file read to maze
+# - 'go through all sockets' game mechanic
+#   - socket will recharge x-amount of points to batery
+#   - memory for all used sockets
+#   - change socket color to gray if used
+
 from tkinter import *
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -61,6 +68,8 @@ class MazeUI:
         window.mainloop()
     
     def draw_maze(self, window):
+        if self.canvas != None:
+            self.canvas.delete("all")
         height = 500
         width = 500
         self.canvas = tk.Canvas(window, height= height, width= width)
@@ -78,6 +87,8 @@ class MazeUI:
         self.canvas.grid( column=1, row=1, columnspan=5, rowspan=7, sticky="SNEW")
 
     def draw_batery(self, window):
+        if self.bcanvas != None:
+            self.bcanvas.delete("all")
         height = 500
         width = 100
         self.piece_height = (0.95*height)/len(self.batery) 
@@ -109,15 +120,15 @@ class MazeUI:
         self.batery_down.grid(row=8, column=0, sticky="NEW", padx=5, pady=5)
 
     def draw_buttons(self, window):
-        '''
+        
         menubar = tk.Menu(window)
-        instructions = tk.Menu(menubar, tearoff=0)
-        instructions.add_cascade(label="Instructions", menu=instructions)
-        instructions.add_command(label="How to play")
-        instructions.add_command(label="Coordinates")
-        instructions.add_command(label="Path to file")
+        instructions = tk.Menu(menubar)
+        menubar.add_cascade(label="Instructions", menu=instructions)
+        instructions.add_command(label="How to play", command = None)
+        instructions.add_command(label="Coordinates", command = None)
+        instructions.add_command(label="Path to file", command = None)
         window.config(menu= menubar)
-        '''
+        
         
         select_maze = tk.Label(window, text="Select maze")
         select_maze.configure(bg="lightgray", font="Helvetica 14 bold")
@@ -143,9 +154,11 @@ class MazeUI:
         from_file = tk.Entry(window, justify="center", font="Helvetica 10 bold")
         from_file.insert(0, "Copy path to maze from PC")
         from_file.grid(row=3, column=6, columnspan=3, sticky="SNEW", padx=5, pady=5)
-        def clear():
-            from_file.delete(0, END)
-        clear_from_file = tk.Button(window, text="X", command=clear,bg="lightgray", font="Helvetica 10 bold")
+        
+        def read_from_file():
+            pass
+
+        clear_from_file = tk.Button(window, text="✓", command=read_from_file,bg="lightgray")
         clear_from_file.grid(row=3, column=9, sticky="SNEW", pady=5)
 
         coords = tk.Label(window, text="Coordinates of Robot")
