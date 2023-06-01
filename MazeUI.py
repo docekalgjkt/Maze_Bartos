@@ -10,6 +10,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from Translator import *
 from Memory import *
+import os
 
 class MazeUI:
     def __init__(self):
@@ -36,6 +37,8 @@ class MazeUI:
         self.batery_up = None
         self.batery_down = None
         self.error = None
+        self.radio = None
+        self.copy = None
         self.UI()
 
     def UI(self):
@@ -80,6 +83,7 @@ class MazeUI:
                 if self.maze_transcript[y][x] == 1:
                     block = self.canvas.create_rectangle(x*self.block_width, y*self.block_height, (x+1)*self.block_width,(y+1)*self.block_height, fill="black")
                 elif self.maze_transcript[y][x] == 2:
+                    # draw better socket (with lightning bolt)
                     socket_path = self.canvas.create_rectangle(x*self.block_width, y*self.block_height, (x+1)*self.block_width,(y+1)*self.block_height, fill="white")
                     socket = self.canvas.create_oval(x*self.block_width+5, y*self.block_height+5, (x+1)*self.block_width-5,(y+1)*self.block_height-5,fill="yellow", width=2)
                 else:
@@ -122,11 +126,21 @@ class MazeUI:
     def draw_buttons(self, window):
         
         menubar = tk.Menu(window)
-        instructions = tk.Menu(menubar)
-        menubar.add_cascade(label="Instructions", menu=instructions)
-        instructions.add_command(label="How to play", command = None)
-        instructions.add_command(label="Coordinates", command = None)
-        instructions.add_command(label="Path to file", command = None)
+        help = tk.Menu(menubar, tearoff=0)
+        file = tk.Menu(menubar, tearoff=0)
+        settings = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file)
+        file.add_command(label="new file", command=None)
+        file.add_command(label="open file", command=None)
+        file.add_command(label="save file", command=None)
+        menubar.add_cascade(label="Settings", menu=settings)
+        self.radio = StringVar()
+        settings.add_radiobutton(label="pre-set files", variable=self.radio, value=1)
+        settings.add_radiobutton(label="file from PC", variable=self.radio, value=2)
+        menubar.add_cascade(label="Help", menu=help)
+        help.add_command(label="How to play", command = None)
+        help.add_command(label="Coordinates", command = None)
+        help.add_command(label="Path to file", command = None)
         window.config(menu= menubar)
         
         
@@ -253,6 +267,7 @@ class MazeUI:
 
         def go():
             # diable buttons
+            print(self.radio)
             if self.error != None:
                 self.error.destroy()
                 self.error = None
@@ -268,29 +283,31 @@ class MazeUI:
             from_file["state"] = DISABLED
             self.batery_up["state"] = DISABLED
             self.batery_down["state"] = DISABLED
-            if x_coord.get() != "X" and y_coord.get() != "Y":
-                if self.maze_transcript[int(y_coord.get())][int(x_coord.get())] != 1:
-                    try:
-                        self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
-                        path = self.memory.find_socket()
-                        copy = path.copy()
-                        self.previous = path.pop()
-                        for i in self.batery:
-                            if i < len(copy)-1:
-                                empty = self.bcanvas.create_rectangle(0+2,i*self.piece_height+2,100, (i*self.piece_height)+self.piece_height, fill="lightgray")
-                                window.after(750, walk(path))
-                        if len(copy)-1 <= len(self.batery):
-                            draw_congrats()
-                        elif len(copy) > len(self.batery):
-                            draw_gameOver()
-                    except IndexError:
-                        error("Robot can't reach socket. Please place him better! <3")
-                        
+            if self.maze_transcript != None:
+                if x_coord.get() != "X" and y_coord.get() != "Y":
+                    if self.maze_transcript[int(y_coord.get())][int(x_coord.get())] != 1:
+                        try:
+                            self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
+                            path = self.memory.find_socket()
+                            self.copy = path.copy()
+                            self.previous = path.pop()
+                            for i in self.batery:
+                                if i < len(self.copy)-1:
+                                    empty = self.bcanvas.create_rectangle(0+2,i*self.piece_height+2,100, (i*self.piece_height)+self.piece_height, fill="lightgray")
+                                    window.after(750, walk(path))
+                            if len(self.copy)-1 <= len(self.batery):
+                                draw_congrats()
+                            elif len(self.copy) > len(self.batery):
+                                draw_gameOver()
+                        except IndexError:
+                            error("<3 Robot can't reach socket. Please place him better! <3")
+                            
+                    else:
+                        error("<3 Please do not place Robot on walls. Thank you! <3")
                 else:
-                    error("Please do not place Robot on walls. Thank you! <3")
+                    error("<3 Please set both coordinate walues. Thank you! <3")
             else:
-                error("Please set both coordinate walues. Thank you! <3")
-                    
+                error("<3 Please open any maze first. Thank you! <3")  
         play = tk.Button(window, text="Play!", command=go, bg="limegreen", font="Helvetica 25 bold")
         play.grid(row=7, column=6, columnspan=4, sticky="SNEW", padx=5, pady=10)
 
@@ -305,6 +322,7 @@ class MazeUI:
         def draw_sprite(canvas, coords):
             x = coords[1]
             y = coords[0]
+            # draw better sprite than circle
             self.robot = self.canvas.create_oval(x*self.block_width+5, y*self.block_height+5, (x+1)*self.block_width-5,(y+1)*self.block_height-5, fill="steelblue", width=2)
         
         def exit_game():
@@ -314,7 +332,13 @@ class MazeUI:
             self.exit_button.grid(row=4, column=1, rowspan=2, columnspan=5, sticky="N")
 
         def draw_congrats():
-            self.congrats = tk.Label(window,text="Congratulations", font= "Helvetica 25 bold", fg= "green")
+            if 0 < len(self.batery) - (len(self.copy)-1) <= 3: 
+                congratulations = "★★ Congratulations ★★"
+            elif len(self.batery) > len(self.copy)-1:
+                congratulations = "★ Congratulations ★"
+            elif len(self.batery) == len(self.copy)-1:
+                congratulations = "★★★ Congratulations ★★★"
+            self.congrats = tk.Label(window,text=f"{congratulations}", font= "Helvetica 25 bold", fg= "green")
             self.congrats.grid(row= 2, column= 1, columnspan=5, sticky="SNEW")
             play_again()
             exit_game()
