@@ -1,16 +1,8 @@
-# To-Do
-# - create from file read to maze
-# - 'go through all sockets' game mechanic
-#   - socket will recharge x-amount of points to batery
-#   - memory for all used sockets
-#   - change socket color to gray if used
-
 from tkinter import *
 import tkinter as tk
 import tkinter.ttk as ttk
 from Translator import *
 from Memory import *
-import os
 
 class MazeUI:
     def __init__(self):
@@ -152,7 +144,7 @@ class MazeUI:
                 self.maze_height = self.translator.height
                 self.draw_maze(window)
                 if x_coord.get() != "X" and y_coord.get() != "Y":
-                    draw_sprite(self.canvas, [int(y_coord.get()), int(x_coord.get())]) 
+                    draw_sprite(self.canvas, [get_y(), get_x()]) 
         
         choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold", state="readonly")
         choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2", "MazeScript3", "MazeScript4"]
@@ -171,8 +163,8 @@ class MazeUI:
                 x_coord.insert(0, "0")
                 if x_coord.get() != "X" and y_coord.get() != "Y":
                     move_sprite(self.block_width, 0)
-            elif int(x_coord.get()) < self.maze_width-1:
-                x_now = int(x_coord.get())
+            elif get_x() < self.maze_width-1:
+                x_now = get_x()
                 x_coord.delete(0, END)
                 x_now += 1
                 x_coord.insert(0, x_now)
@@ -187,8 +179,8 @@ class MazeUI:
                 if x_coord.get() != "X" and y_coord.get() != "Y":
                     move_sprite(0, self.block_height)
 
-            elif int(y_coord.get()) < self.maze_height-1:
-                y_now = int(y_coord.get())
+            elif get_y() < self.maze_height-1:
+                y_now = get_y()
                 y_coord.delete(0, END)
                 y_now += 1
                 y_coord.insert(0, y_now)
@@ -201,7 +193,7 @@ class MazeUI:
                     x_coord.delete(0, END)
                     x_coord.insert(0, "X")
                 else:
-                    x_now = int(x_coord.get())
+                    x_now = get_x()
                     x_coord.delete(0, END)
                     x_now -= 1
                     x_coord.insert(0, x_now)
@@ -213,13 +205,32 @@ class MazeUI:
                     y_coord.delete(0, END)
                     y_coord.insert(0, "Y")
                 else:
-                    y_now = int(y_coord.get())
+                    y_now = get_y()
                     y_coord.delete(0, END)
                     y_now -= 1
                     y_coord.insert(0, y_now)
             move_sprite(0, -self.block_height)
 
-
+        def get_x():
+            if "," in x_coord.get() or "." in x_coord.get():
+                error("<3 Please set coordinates to integer values. Thank you! <3")
+            else:
+                try:
+                    num = int(x_coord.get())
+                    return num 
+                except ValueError:
+                    error("<3 Please set coordinates to integer values. Thank you! <3")
+        
+        def get_y():
+            if "," in y_coord.get() or "." in y_coord.get():
+                error("<3 Please set coordinates to integer values. Thank you! <3")
+            else:
+                try:
+                    num = int(y_coord.get())
+                    return num 
+                except ValueError:
+                    error("<3 Please set coordinates to integer values. Thank you! <3")
+        
         x_coord = tk.Entry(window, width=3, justify="center", font="Helvetica 25 bold")
         x_coord.insert(0, "X")
         x_coord.grid(row=5, column=6, rowspan=2, sticky="SNEW", padx=5)
@@ -252,7 +263,6 @@ class MazeUI:
 
         def go():
             # diable buttons
-            print(self.radio)
             if self.error != None:
                 self.error.destroy()
                 self.error = None
@@ -268,16 +278,16 @@ class MazeUI:
             self.batery_down["state"] = DISABLED
             if self.maze_transcript != None:
                 if x_coord.get() != "X" and y_coord.get() != "Y":
-                    if self.maze_transcript[int(y_coord.get())][int(x_coord.get())] != 1:
+                    if self.maze_transcript[get_y()][get_x()] != 1:
                         try:
-                            self.memory = Memory([int(y_coord.get()), int(x_coord.get())], self.maze_transcript)
+                            self.memory = Memory([get_y(), get_x()], self.maze_transcript)
                             path = self.memory.find_socket()
                             self.copy = path.copy()
                             self.previous = path.pop()
                             for i in self.batery:
                                 if i < len(self.copy)-1:
                                     empty = self.bcanvas.create_rectangle(0+2,i*self.piece_height+2,100, (i*self.piece_height)+self.piece_height, fill="lightgray")
-                                    window.after(750, walk(path))
+                                    window.after(575, walk(path))
                             if len(self.copy)-1 <= len(self.batery):
                                 draw_congrats()
                             elif len(self.copy) > len(self.batery):
@@ -296,7 +306,7 @@ class MazeUI:
 
         def move_sprite(x, y):
             if self.robot == None:
-                draw_sprite(self.canvas, [int(y_coord.get()), int(x_coord.get())]) 
+                draw_sprite(self.canvas, [get_y(), get_x()]) 
             else:
                 self.canvas.move(self.robot, x, y)
 
@@ -327,6 +337,9 @@ class MazeUI:
             exit_game()
         
         def play_again():
+            if self.error != None:
+                self.error.destroy()
+                self.error = None
             def playagain():
                 up_x["state"] = NORMAL
                 up_y["state"] = NORMAL
@@ -373,17 +386,5 @@ class MazeUI:
             self.batery_down["state"] = NORMAL
 
 
-        '''
-        R = (5/14)*self.block_width
-        r = (3/14)*self.block_width
-        left= canvas.create_oval(x*(2*R-r),x*self.block_width,y*(2*R+r),y*(2*r), fill= "dimgray")
-        right= canvas.create_oval(x*(2*R-r),x*(self.block_height-2*r),y*(2*R+r),y*(self.block_height), fill="dimgray") 
-        body= canvas.create_oval(x*self.block_width,x*((self.block_height/2)-R),y*(2*R),y*((self.block_height/2)+R), fill="darkgray")
-        glasses= canvas.create_oval(x*(self.block_width*5/14),x*r,y*2*R,y*(self.block_height-r), fill="steelblue")
-        '''
-
-# error line interface
-
-# int_variable.type() - returns type of variable as <class 'int'>
 if __name__ == "__main__":
     maze = MazeUI()
