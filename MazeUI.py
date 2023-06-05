@@ -132,11 +132,6 @@ class MazeUI:
         menubar.add_cascade(label="File", menu=file)
         file.add_command(label="new file", command=None)
         file.add_command(label="open file", command=None)
-        file.add_command(label="save file", command=None)
-        menubar.add_cascade(label="Settings", menu=settings)
-        self.radio = StringVar()
-        settings.add_radiobutton(label="pre-set files", variable=self.radio, value=1)
-        settings.add_radiobutton(label="file from PC", variable=self.radio, value=2)
         menubar.add_cascade(label="Help", menu=help)
         help.add_command(label="How to play", command = None)
         help.add_command(label="Coordinates", command = None)
@@ -146,7 +141,7 @@ class MazeUI:
         
         select_maze = tk.Label(window, text="Select maze")
         select_maze.configure(bg="lightgray", font="Helvetica 14 bold")
-        select_maze.grid(row=1, column=6, columnspan=4, sticky="SEW")
+        select_maze.grid(row=2, column=6, columnspan=4, sticky="SEW")
         
         def maze_Selcted(event):
             if choose.get() != "Pick the Maze":
@@ -162,18 +157,8 @@ class MazeUI:
         choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold", state="readonly")
         choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2", "MazeScript3", "MazeScript4"]
         choose.set("Pick the Maze")
-        choose.grid(row=2, column=6, columnspan=4, sticky="SNEW", padx=5, pady=5)
+        choose.grid(row=3, column=6, columnspan=4, sticky="SNEW", padx=5, pady=5)
         choose.bind("<<ComboboxSelected>>", maze_Selcted)
-
-        from_file = tk.Entry(window, justify="center", font="Helvetica 10 bold")
-        from_file.insert(0, "Copy path to maze from PC")
-        from_file.grid(row=3, column=6, columnspan=3, sticky="SNEW", padx=5, pady=5)
-        
-        def read_from_file():
-            pass
-
-        clear_from_file = tk.Button(window, text="✓", command=read_from_file,bg="lightgray")
-        clear_from_file.grid(row=3, column=9, sticky="SNEW", pady=5)
 
         coords = tk.Label(window, text="Coordinates of Robot")
         coords.configure(bg="lightgray", font="Helvetica 14 bold")
@@ -279,8 +264,6 @@ class MazeUI:
             y_coord["state"] = DISABLED
             choose["state"] = DISABLED
             play["state"] = DISABLED
-            clear_from_file["state"] = DISABLED
-            from_file["state"] = DISABLED
             self.batery_up["state"] = DISABLED
             self.batery_down["state"] = DISABLED
             if self.maze_transcript != None:
@@ -353,8 +336,6 @@ class MazeUI:
                 y_coord["state"] = NORMAL
                 choose["state"] = NORMAL
                 play["state"] = NORMAL
-                clear_from_file["state"] = NORMAL
-                from_file["state"] = NORMAL
                 self.batery_up["state"] = NORMAL
                 self.batery_down["state"] = NORMAL
                 self.exit_button.destroy()
@@ -388,11 +369,8 @@ class MazeUI:
             y_coord["state"] = NORMAL
             choose["state"] = NORMAL
             play["state"] = NORMAL
-            clear_from_file["state"] = NORMAL
-            from_file["state"] = NORMAL
             self.batery_up["state"] = NORMAL
             self.batery_down["state"] = NORMAL
-
 
 
         '''
