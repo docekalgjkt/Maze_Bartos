@@ -35,8 +35,8 @@ class Memory:
                 if node.position[0] == 0 and i == -1:
                     continue
                 else:
-                    if self.transcript[node.position[0]+i][node.position[1]] != 1:
-                        child = Node([node.position[0]+i,node.position[1]])
+                    if self.transcript[int(node.position[0])+int(i)][int(node.position[1])] != 1:
+                        child = Node([int(node.position[0])+int(i),int(node.position[1])])
                         child.parent = node
                         if child.position not in self.discovered:
                             self.discovered.append(child.position)
@@ -52,8 +52,8 @@ class Memory:
                 if node.position[1] == 0 and j == -1:
                     continue
                 else:
-                    if self.transcript[node.position[0]][node.position[1]+j] != 1:
-                        child = Node([node.position[0],node.position[1]+j])
+                    if self.transcript[int(node.position[0])][int(node.position[1])+int(j)] != 1:
+                        child = Node([int(node.position[0]),int(node.position[1])+int(j)])
                         child.parent = node
                         if child.position not in self.discovered:
                             self.discovered.append(child.position)
@@ -64,7 +64,7 @@ class Memory:
             except IndexError:
                 node.children.append(None)
         
-        if self.transcript[node.position[0]][node.position[1]] == 2:
+        if self.transcript[int(node.position[0])][int(node.position[1])] == 2:
             knot = node
             self.path.append(knot)
             while knot.parent != None:
