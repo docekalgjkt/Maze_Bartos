@@ -31,6 +31,10 @@ class MazeUI:
         self.error = None
         self.radio = None
         self.copy = None
+        self.xText = None
+        self.yText = None
+        self.xInt = 0
+        self.yInt = 0
         self.UI()
 
     def UI(self):
@@ -144,7 +148,7 @@ class MazeUI:
                 self.maze_height = self.translator.height
                 self.draw_maze(window)
                 if x_coord.get() != "X" and y_coord.get() != "Y":
-                    draw_sprite(self.canvas, [get_y(), get_x()]) 
+                    draw_sprite(self.canvas, [y_coord.get(), x_coord.get()]) 
         
         choose = ttk.Combobox(window, textvariable= tk.StringVar(), font="Helvetica 10 bold", state="readonly")
         choose['values'] = ["MazeScript0", "MazeScript1", "MazeScript2", "MazeScript3", "MazeScript4"]
@@ -157,90 +161,64 @@ class MazeUI:
         coords.grid(row=4, column=6, columnspan=4, sticky="SEW", padx=5, pady=10)
 
         def add_x():
-            self.robot
-            if x_coord.get() == "X":
-                x_coord.delete(0, END)
-                x_coord.insert(0, "0")
-                if x_coord.get() != "X" and y_coord.get() != "Y":
+            if self.xText.get() == "X":
+                self.xText.set("0")
+                if self.xText.get() != "X" and self.yText.get() != "Y":
                     move_sprite(self.block_width, 0)
-            elif get_x() < self.maze_width-1:
-                x_now = get_x()
-                x_coord.delete(0, END)
-                x_now += 1
-                x_coord.insert(0, x_now)
-                if x_coord.get() != "X" and y_coord.get() != "Y":
+            elif self.xInt < self.maze_width-1: 
+                self.xInt += 1
+                self.xText.set(f"{self.xInt}")
+                if self.xText.get() != "X" and self.yText.get() != "Y":
                     move_sprite(self.block_width, 0)
-
         
         def add_y():
-            if y_coord.get() == "Y":
-                y_coord.delete(0, END)
-                y_coord.insert(0, "0")
-                if x_coord.get() != "X" and y_coord.get() != "Y":
+            if self.yText.get() == "Y":
+                self.yText.set("0")
+                if self.xText.get() != "X" and self.yText.get() != "Y":
                     move_sprite(0, self.block_height)
 
-            elif get_y() < self.maze_height-1:
-                y_now = get_y()
-                y_coord.delete(0, END)
-                y_now += 1
-                y_coord.insert(0, y_now)
-                if x_coord.get() != "X" and y_coord.get() != "Y":
+            elif self.yInt < self.maze_height-1:
+                self.yInt += 1
+                self.yText.set(f"{self.yInt}")
+                if self.xText.get() != "X" and self.yText.get() != "Y":
                     move_sprite(0, self.block_height)
         
         def subtract_x():
-            if x_coord.get() != "X":
-                if x_coord.get() == "0":
-                    x_coord.delete(0, END)
-                    x_coord.insert(0, "X")
+            if self.xText.get() != "X":
+                if self.xInt == 0:
+                    self.xText.set("X")
+                    self.canvas.delete(self.robot)
+                    self.robot = None
                 else:
-                    x_now = get_x()
-                    x_coord.delete(0, END)
-                    x_now -= 1
-                    x_coord.insert(0, x_now)
-            move_sprite(-self.block_width, 0)
+                    self.xInt -= 1
+                    self.xText.set(f"{self.xInt}")
+                    if self.xText.get() != "X" and self.yText.get() != "Y":
+                        move_sprite(-self.block_width, 0)
         
         def subtract_y():
-            if y_coord.get() != "Y":
-                if y_coord.get() == "0":
-                    y_coord.delete(0, END)
-                    y_coord.insert(0, "Y")
+            if self.yText.get() != "Y":
+                if self.yInt == 0:
+                    self.yText.set("Y")
+                    self.canvas.delete(self.robot)
+                    self.robot = None
                 else:
-                    y_now = get_y()
-                    y_coord.delete(0, END)
-                    y_now -= 1
-                    y_coord.insert(0, y_now)
-            move_sprite(0, -self.block_height)
-
-        def get_x():
-            if "," in x_coord.get() or "." in x_coord.get():
-                error("<3 Please set coordinates to integer values. Thank you! <3")
-            else:
-                try:
-                    num = int(x_coord.get())
-                    return num 
-                except ValueError:
-                    error("<3 Please set coordinates to integer values. Thank you! <3")
+                    self.yInt -= 1
+                    self.yText.set(f"{self.yInt}")
+                    if self.xText.get() != "X" and self.yText.get() != "Y":
+                        move_sprite(0, -self.block_height)
         
-        def get_y():
-            if "," in y_coord.get() or "." in y_coord.get():
-                error("<3 Please set coordinates to integer values. Thank you! <3")
-            else:
-                try:
-                    num = int(y_coord.get())
-                    return num 
-                except ValueError:
-                    error("<3 Please set coordinates to integer values. Thank you! <3")
-        
-        x_coord = tk.Entry(window, width=3, justify="center", font="Helvetica 25 bold")
-        x_coord.insert(0, "X")
+        self.xText = StringVar()
+        x_coord = tk.Entry(window, textvariable=self.xText, width=3, justify="center", font="Helvetica 25 bold", state="readonly")
+        self.xText.set("X")
         x_coord.grid(row=5, column=6, rowspan=2, sticky="SNEW", padx=5)
         up_x = tk.Button(window, text="▲", command=add_x, bg="lightgray", font="Helvetica 10 bold")
         up_x.grid(row=5, column=7, sticky="SNEW")
         down_x = tk.Button(window, text="▼", command=subtract_x, bg="lightgray", font="Helvetica 10 bold")
         down_x.grid(row=6, column=7, sticky="SNEW")
 
-        y_coord = tk.Entry(window, width=3, justify="center", font="Helvetica 25 bold")
-        y_coord.insert(0, "Y")
+        self.yText = StringVar()
+        y_coord = tk.Entry(window, width=3, textvariable=self.yText, justify="center", font="Helvetica 25 bold", state="readonly")
+        self.yText.set("Y")
         y_coord.grid(row=5, column=8, rowspan=2, sticky="SNEW", padx=5)
         up_y = tk.Button(window, text="▲", command=add_y, bg="lightgray", font="Helvetica 10 bold")
         up_y.grid(row=5, column=9, sticky="SNEW")
@@ -278,9 +256,9 @@ class MazeUI:
             self.batery_down["state"] = DISABLED
             if self.maze_transcript != None:
                 if x_coord.get() != "X" and y_coord.get() != "Y":
-                    if self.maze_transcript[get_y()][get_x()] != 1:
+                    if self.maze_transcript[y_coord.get()][x_coord.get()] != 1:
                         try:
-                            self.memory = Memory([get_y(), get_x()], self.maze_transcript)
+                            self.memory = Memory([y_coord.get(), x_coord.get()], self.maze_transcript)
                             path = self.memory.find_socket()
                             self.copy = path.copy()
                             self.previous = path.pop()
@@ -306,7 +284,7 @@ class MazeUI:
 
         def move_sprite(x, y):
             if self.robot == None:
-                draw_sprite(self.canvas, [get_y(), get_x()]) 
+                draw_sprite(self.canvas, [self.yInt, self.xInt]) 
             else:
                 self.canvas.move(self.robot, x, y)
 
