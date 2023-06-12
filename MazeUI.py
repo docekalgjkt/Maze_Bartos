@@ -256,7 +256,7 @@ class MazeUI:
             self.batery_down["state"] = DISABLED
             if self.maze_transcript != None:
                 if x_coord.get() != "X" and y_coord.get() != "Y":
-                    if self.maze_transcript[y_coord.get()][x_coord.get()] != 1:
+                    if self.maze_transcript[int(y_coord.get())][int(x_coord.get())] != 1:
                         try:
                             self.memory = Memory([y_coord.get(), x_coord.get()], self.maze_transcript)
                             path = self.memory.find_socket()
@@ -333,6 +333,7 @@ class MazeUI:
                 self.again.destroy()
                 maze_Selcted("<<ComboboxSelected>>")
                 self.draw_batery(window)
+                move_sprite(self.canvas, [self.xInt, self.yInt])
                 if self.congrats != None:
                     self.congrats.destroy()
                     self.congrats = None
